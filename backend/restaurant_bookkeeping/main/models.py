@@ -28,12 +28,12 @@ class MainCategory:
     LABOUR = "LABOUR"
     OTHERS = "OTHERS"
 
-    main_categories_choices = {
-        OPERATING: 'Operating',
-        INVENTORY: 'Inventory',
-        LABOUR: 'Labour',
-        OTHERS: 'Others'
-    }
+    MAIN_CATEGORIES_CHOICES = [
+        (OPERATING, 'Operating'),
+        (INVENTORY, 'Inventory'),
+        (LABOUR, 'Labour'),
+        (OTHERS, 'Others'),
+    ]
 
 
 class ExpenseCategory(models.Model):
@@ -47,7 +47,7 @@ class ExpenseCategory(models.Model):
 
     name = models.CharField(max_length=255, blank=False, unique=True)
     description = models.TextField(blank=True)
-    main_category = models.CharField(choices=MainCategory.main_categories_choices)
+    main_category = models.CharField(choices=MainCategory.MAIN_CATEGORIES_CHOICES)
 
     # payees_with_default (O-M Payee): Payees that set this category as default
     
@@ -90,9 +90,9 @@ class Payee(models.Model):
 class Expense(models.Model):
 
     payment_status_choices = {
-        'paid': 'Paid',
-        'pending': 'Pending',
-        'unpaid': 'Unpaid'
+        'PAID': 'Paid',
+        'PENDING': 'Pending',
+        'UNPAID': 'Unpaid'
     }
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -104,7 +104,7 @@ class Expense(models.Model):
     payment = models.ForeignKey(PaymentAccount, on_delete=models.SET_NULL, null=True, blank=False, related_name="expenses")
 
     total_amount = models.IntegerField(blank=False)
-    main_category = models.CharField(max_length=10, choices=MainCategory.main_categories_choices)
+    main_category = models.CharField(max_length=10, choices=MainCategory.MAIN_CATEGORIES_CHOICES)
     category = models.ForeignKey(ExpenseCategory, on_delete=models.SET_NULL, null=True, blank=False, related_name="expenses")
     note = models.TextField(blank=True)
 

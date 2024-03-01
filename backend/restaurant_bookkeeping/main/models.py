@@ -1,6 +1,9 @@
+from typing import Iterable
 from django.db import models
 import uuid
 from django.contrib.auth.models import User
+
+from django.core.exceptions import ValidationError
 
 class Outlet(models.Model):
     name = models.CharField(max_length=255, blank=False, unique=True)
@@ -48,6 +51,13 @@ class ExpenseCategory(models.Model):
     name = models.CharField(max_length=255, blank=False, unique=True)
     description = models.TextField(blank=True)
     main_category = models.CharField(choices=MainCategory.MAIN_CATEGORIES_CHOICES)
+
+    def save(self, *args, **kwargs) -> None:
+        if ExpenseCategory.objects.filter(name=self.name).exists():
+            raise ValidationError('An ExpenseCategory with this name already exists.') 
+
+
+        return super().save(*args, **kwargs)
 
     # payees_with_default (O-M Payee): Payees that set this category as default
     

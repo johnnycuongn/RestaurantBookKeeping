@@ -10,11 +10,14 @@ urlpatterns = [
 
   path('outlets/', outlet_views.OutletView.as_view()),
   path('outlets/<int:id>/', outlet_views.OutletView.as_view()),
+  path('outlets/<int:id>/delete/', outlet_views.OutletView.as_view()),
 
   path('payments/', payment_account_views.PaymentAccountView.as_view()),
   path('payments/<int:id>', payment_account_views.PaymentAccountView.as_view()),
+  path('payments/<int:id>/delete/', payment_account_views.PaymentAccountView.as_view()),
 
   path('payees/', payee_views.PayeeView.as_view()),
-  path('payees/<int:id>', payee_views.PayeeView.as_view())
+  path('payees/<uuid:id>', payee_views.PayeeView.as_view()),
+  path('payees/<uuid:id>/delete/', payee_views.PayeeView.as_view())
   
 ]

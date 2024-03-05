@@ -37,6 +37,9 @@ class OutletView(View):
     
   def post(self, request, *args, **kwargs):
     try:
+      if request.path.endswith('/delete/'):
+        return self.handle_delete(request, *args, **kwargs)
+
       if request.body is None: 
         return JsonResponse({'error': 'Invalid request body'}, status=404)
       
@@ -84,3 +87,20 @@ class OutletView(View):
         return JsonResponse({'error': 'Duplication on Outlet'})
       return JsonResponse({'error': f'Database Integrity Error: {str(e)}'})
     
+  def handle_delete(self, request, *args, **kwargs):
+    try:
+      outlet_id = kwargs.get('id')
+      if outlet_id is None:
+        return JsonResponse({'error': f'ID required for deletion'}, status=400)
+      
+      outlet_base = Outlet.objects.filter(id=outlet_id)
+      if outlet_base.exists():
+        outlet = outlet_base.first()
+
+        outlet.delete()
+        return JsonResponse({'message': f'Delete Outlet {outlet.name} successfully'}, status=200)
+      
+      return JsonResponse({'error': f'Failed to delete outlet with id {outlet_id}'}, status=400)
+
+    except (ValueError, KeyError) as e:
+      return JsonResponse({'error': str(e)}, status = 400)

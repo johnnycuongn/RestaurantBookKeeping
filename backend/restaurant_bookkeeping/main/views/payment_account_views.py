@@ -44,6 +44,9 @@ class PaymentAccountView(View):
   def post(self, request, *args, **kwargs):
     valid_method_choices_display = dict(PaymentAccount.payment_methods_choices).values()
 
+    if request.path.endswith('delete/'):
+      return self.handle_delete(request, *args, **kwargs)
+
     try:
       if request.body is None: 
         return JsonResponse({'error': 'Invalid request body'}, status=404)
@@ -77,7 +80,7 @@ class PaymentAccountView(View):
         if data.get('name') is None:
           return JsonResponse({'error': f'{self.display_name} Name is required for creating {self.display_name}'}, status=404)
         
-        if data.get('method') is not None and not self.is_valid_payment_method(data.get('method')):
+        if data.get('method') is None or not self.is_valid_payment_method(data.get('method')):
           return JsonResponse({'error': f'Invalid Payment Method. Valid choices are {valid_method_choices_display}'})
       
         new_payment_account = self.objects.create(
@@ -92,7 +95,26 @@ class PaymentAccountView(View):
       if 'unique constraint' in str(e):
         return JsonResponse({'error': f'Duplication on {self.display_name}'})
       return JsonResponse({'error': f'Database Integrity Error: {str(e)}'})
-    
+  
+  def handle_delete(self, request, *args, **kwargs):
+    try:
+      payment_id = kwargs.get('id')
+
+      if payment_id is None:
+        return JsonResponse({'error': 'ID is required for deletion'})
+
+      payment_base = self.objects.filter(id=payment_id)
+      if payment_base.exists():
+        payment = payment_base.first()
+
+        payment.delete()
+
+        return JsonResponse({'message': f'Payment Account ({payment.id}){payment.name} deleted successfully'}, status=200)
+
+      return JsonResponse({'message': f'Failed to delete payment with {payment_id}'}, status=400)
+
+    except (ValueError, KeyError) as e:
+      return JsonResponse(data={'error': str(e)}, status = 400)
 
   def is_valid_payment_method(self, method: str) -> bool:
     method = method.upper()

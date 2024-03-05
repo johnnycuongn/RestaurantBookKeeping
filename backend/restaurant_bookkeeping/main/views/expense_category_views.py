@@ -12,7 +12,8 @@ from ..models import ExpenseCategory, MainCategory
 @method_decorator(csrf_exempt, name='dispatch')  # Disable CSRF for simplicity
 class ExpenseCategoryAPIView(View):
     
-    def serialize(self, object: ExpenseCategory):
+    @staticmethod
+    def serialize(object: ExpenseCategory):
         return {
             'id': object.id,
             'name': object.name,
@@ -27,7 +28,7 @@ class ExpenseCategoryAPIView(View):
             try:
                 category = ExpenseCategory.objects.get(id=category_id)
                 
-                return JsonResponse(self.serialize(category))
+                return JsonResponse(ExpenseCategoryAPIView.serialize(category))
             except ExpenseCategory.DoesNotExist:
                 return JsonResponse({'error': 'ExpenseCategory not found'}, status=404)
         else:

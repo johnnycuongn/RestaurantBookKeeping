@@ -43,6 +43,8 @@ class PaymentAccountView(View):
     
   def post(self, request, *args, **kwargs):
     valid_method_choices_display = dict(PaymentAccount.payment_methods_choices).values()
+    valid_method_choices_keys = dict(PaymentAccount.payment_methods_choices).keys()
+
 
     if request.path.endswith('delete/'):
       return self.handle_delete(request, *args, **kwargs)
@@ -67,7 +69,7 @@ class PaymentAccountView(View):
 
           if data.get('method'):
             if not self.is_valid_payment_method(data.get('method')):
-              return JsonResponse({'error': f'Invalid Payment Method. Valid choices are {valid_method_choices_display}'})
+              return JsonResponse({'error': f'Invalid Payment Method. Valid choices are {valid_method_choices_keys}'})
             payment_account.method = data.get('method')
 
           payment_account.save()
